@@ -89,9 +89,11 @@ def mptt_before_insert(mapper, connection, instance):
     table_pk = getattr(table.c, db_pk.name)
 
     if instance.parent_id is None:
+        # parent_id 则设为 top node
         instance.left = 1
         instance.right = 2
         instance.level = instance.get_default_level()
+        # tree_id 为 数据的中 tree_id 最大值 +1
         tree_id = connection.scalar(
             select(
                 [
@@ -101,6 +103,7 @@ def mptt_before_insert(mapper, connection, instance):
         ) or 1
         instance.tree_id = tree_id
     else:
+        # 获取父级的信息
         (parent_pos_left,
          parent_pos_right,
          parent_tree_id,
@@ -144,6 +147,7 @@ def mptt_before_insert(mapper, connection, instance):
             )
         )
 
+        # 更新新插入的 node 信息
         instance.level = parent_level + 1
         instance.tree_id = parent_tree_id
         instance.left = parent_pos_right
