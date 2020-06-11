@@ -471,6 +471,7 @@ class BaseNestedSets(object):
         session.query(cls).filter_by(tree_id=tree_id).update(
             {cls.left: 0, cls.right: 0, cls.level: 0}
         )
+        # 获取顶级节点
         top = (
             session.query(cls)
             .filter_by(parent_id=None)
@@ -482,6 +483,8 @@ class BaseNestedSets(object):
         top.level = level = cls.get_default_level()
 
         def recursive(children, left, right, level):
+            """递归"""
+            # 每递归一次 level + 1
             level = level + 1
             for i, node in enumerate(children):
                 same_level_right = children[i - 1].right
@@ -492,17 +495,20 @@ class BaseNestedSets(object):
                 if same_level_right:
                     left = same_level_right + 1
 
+                # 设置节点的左右值
                 right = left + 1
                 node.left = left
                 node.right = right
-                parent = node.parent
 
+                # 遍历设置父级节点的右值
+                parent = node.parent
                 j = 0
                 while parent:
                     parent.right = right + 1 + j
                     parent = parent.parent
                     j += 1
 
+                # 设置节点的 level
                 node.level = level
                 recursive(node.children, left, right, level)
 
