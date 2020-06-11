@@ -130,13 +130,17 @@ class BaseNestedSets(object):
 
         * :mod:`sqlalchemy_mptt.tests.cases.integrity.test_hierarchy_structure`
         """
+        # 判断是否是祖先
         if inclusive:
+            # 是否包含自身
             return (
+                # self左值小于等于other的，右值大于等于other的
                 (self.tree_id == other.tree_id)
                 & (self.left <= other.left)
                 & (other.right <= self.right)
             )
         return (
+            # self左值小于other的，右值大于other的
             (self.tree_id == other.tree_id)
             & (self.left < other.left)
             & (other.right < self.right)
@@ -289,6 +293,7 @@ class BaseNestedSets(object):
             return getattr(node, node.get_pk_name())
 
         for node in nodes:
+            # 生成节点数据result
             result = cls._node_to_dict(node, json, json_fields)
             parent_id = node.parent_id
             if node.level != min_level:  # for cildren
@@ -413,6 +418,7 @@ class BaseNestedSets(object):
         else:
             query = query.filter(table.parent_id == None)
         if not include_self:
+            # 是否包含自身
             query = query.filter(self.get_pk_column() != self.get_pk_value())
         return query
 
